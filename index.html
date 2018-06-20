@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Maps API Project</title>
+    <style>
+      #map {
+        height: 600px;  
+        width: 100%;  
+       }
+    </style>
+    <script src="script.js"></script>
+  </head>
+  <body>
+    <h3>Maps API Project</h3>
+    <div id="map"></div>
+    <br><br>
+    <div id="controls">
+      Zoom Level: <input type="number" name="zoom" onclick="updateZoomLevel(this.value)">
+    </div>
+
+
+
+    
+    
+    
+
+    <!--Load the API from the specified URL
+    * The async attribute allows the browser to render the page while the API loads
+    * The key parameter will contain your own API key (which is not needed for this tutorial)
+    * The callback parameter executes the initMap() function
+    -->
+    <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD5WmggCvYp6TFkoYfCZPfCukpr6LSO9AY&callback=initMap">
+    </script>
+  </body>
+</html>
