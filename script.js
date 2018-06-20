@@ -27,7 +27,10 @@ if(navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(function(position) {
         pos = {lat: position.coords.latitude, lng: position.coords.longitude};
         map.panTo(pos);
-        marker.setPosition(pos);
         map.setZoom(17);
+        marker.setPosition(pos);
+        //marker.setLabel("Your current position");
+        
+
     });
 }
