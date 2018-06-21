@@ -4,6 +4,7 @@ var zoomLevel = 9;
 var map;
 var name;
 var markers = {};
+var infoWindows = {};
 var follow;
 
 function initMap2() {
@@ -58,12 +59,17 @@ function updateMarkers(data) {
                 lng: data.information[person].longitude
             };
 
-            markers[data.information[person].name] = new google.maps.Marker({ position: pos, map: map, title: data.information[person].name});
-            markers[data.information[person].name].addListener('click', function() {
+            markers[data.information[person].name] = new google.maps.Marker({ position: pos, map: map, title: data.information[person].name, icon: 'http://iot.kpraveen.in/images/' + data.information[person].name + '.png', /*label: {color: "yellow", text: data.information[person].name}*/});
+
+            infoWindows[data.information[person].name] = new google.maps.InfoWindow({ content: data.information[person].name, title: data.information[person].name, buttons: { close: { visible: false } } });
+
+            infoWindows[data.information[person].name].open(map, markers[data.information[person].name]);
+
+            markers[data.information[person].name].addListener('click', function () {
                 map.panTo(this.getPosition());
                 console.log(this.getTitle() + " centred");
             });
-            markers[data.information[person].name].addListener('dblclick', function() {
+            markers[data.information[person].name].addListener('dblclick', function () {
                 follow = this;
                 document.getElementsByName("unfollow")[0].style.display = "block";
                 console.log("Following " + follow.getTitle());
@@ -79,7 +85,7 @@ function updateMarkers(data) {
             };
 
             markers[data.information[person].name].setPosition(pos);
-            if(follow) map.panTo(follow.getPosition());
+            if (follow) map.panTo(follow.getPosition());
             //console.log(pos);
         }
     }
