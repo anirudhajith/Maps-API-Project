@@ -4,6 +4,7 @@ var zoomLevel = 9;
 var map;
 var name;
 var markers = {};
+var follow;
 
 function initMap2() {
     map = new google.maps.Map(document.getElementById('map'), { zoom: zoomLevel, center: bangalore, disableDoubleClickZoom: true, mapTypeControl: true });
@@ -51,14 +52,21 @@ function updateMarkers(data) {
     if (Object.keys(markers).length === 0 && markers.constructor === Object) {
         for (person in data.information) {
             console.log(data.information[person]);
+            //var name = data.information[person].name;
             pos = {
                 lat: data.information[person].latitude,
                 lng: data.information[person].longitude
             };
 
-            markers[data.information[person].name] = new google.maps.Marker({ position: pos, map: map });
+            markers[data.information[person].name] = new google.maps.Marker({ position: pos, map: map, title: data.information[person].name});
             markers[data.information[person].name].addListener('click', function() {
                 map.panTo(this.getPosition());
+                console.log(this.getTitle() + " centred");
+            });
+            markers[data.information[person].name].addListener('dblclick', function() {
+                follow = this;
+                document.getElementsByName("unfollow")[0].style.display = "block";
+                console.log("Following " + follow.getTitle());
             });
             //console.log(pos);
         }
@@ -71,6 +79,7 @@ function updateMarkers(data) {
             };
 
             markers[data.information[person].name].setPosition(pos);
+            if(follow) map.panTo(follow.getPosition());
             //console.log(pos);
         }
     }
