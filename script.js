@@ -112,6 +112,9 @@ function updateMarkers(data) {
 
             markers[data.information[person].name].setPosition(pos);
             infoWindows[data.information[person].name].setContent(getTimeAgoString(data.information[person].lastLocationTime));
+            circles[data.information[person].name].setCenter(pos);
+            circles[data.information[person].name].setRadius(data.information[person].accuracy);
+
             if (follow) map.panTo(follow.getPosition());
             //console.log(pos);
         }
