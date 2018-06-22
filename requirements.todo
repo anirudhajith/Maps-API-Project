@@ -8,6 +8,6 @@ Requirements:
 ✔ Customize marker to show user's image @done(18-06-21 20:50)
 ✔ Customize marker to show "time ago" @done(18-06-22 10:47)
 ☐ Make fetching location more efficient
-☐ Change unfollow functionality to something that works even in fullscreen mode
+✔ Change unfollow functionality to something that works even in fullscreen mode @done(18-06-22 17:10)
 ✔ Show accuracy circle @done(18-06-22 10:47)
 ☐ Use Infoboxes instead of InfoWindow and Marker combination

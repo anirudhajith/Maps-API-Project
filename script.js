@@ -60,17 +60,17 @@ function updateMarkers(data) {
                 lng: data.information[person].longitude
             };
 
-            markers[data.information[person].name] = new google.maps.Marker({ 
-                position: pos, 
-                map: map, 
-                title: data.information[person].name, 
+            markers[data.information[person].name] = new google.maps.Marker({
+                position: pos,
+                map: map,
+                title: data.information[person].name,
                 icon: 'http://iot.kpraveen.in/images/' + data.information[person].name + '.png',
                 /*label: {color: "yellow", text: data.information[person].name}*/
             });
 
-            infoWindows[data.information[person].name] = new google.maps.InfoWindow({ 
-                content: getTimeAgoString(data.information[person].lastLocationTime), 
-                title: data.information[person].name 
+            infoWindows[data.information[person].name] = new google.maps.InfoWindow({
+                content: getTimeAgoString(data.information[person].lastLocationTime),
+                title: data.information[person].name
             });
 
             circles[data.information[person].name] = new google.maps.Circle({
@@ -82,7 +82,7 @@ function updateMarkers(data) {
                 map: map,
                 center: pos,
                 radius: data.information[person].accuracy
-              });
+            });
 
             infoWindows[data.information[person].name].open(map, markers[data.information[person].name]);
 
@@ -91,9 +91,14 @@ function updateMarkers(data) {
                 console.log(this.getTitle() + " centred");
             });
             markers[data.information[person].name].addListener('dblclick', function () {
-                follow = this;
-                document.getElementsByName("unfollow")[0].style.display = "block";
-                console.log("Following " + follow.getTitle());
+                if (follow) {
+                    follow = undefined;
+                    console.log("Unfollowed");
+                } else {
+                    follow = this;
+                    document.getElementsByName("unfollow")[0].style.display = "block";
+                    console.log("Following " + follow.getTitle());
+                }
             });
             //console.log(pos);
         }
@@ -117,16 +122,16 @@ function updateMarkers(data) {
 function getTimeAgoString(lastSeen) {
     var now = new Date();
     var ls = new Date(lastSeen);
-    var secAgo = Math.round((now - ls)/1000);
-    
-    if(secAgo < 60) { //seconds
+    var secAgo = Math.round((now - ls) / 1000);
+
+    if (secAgo < 60) { //seconds
         return (secAgo + "s ago");
-    } else if(secAgo < 3600) { //minutes
-        return (Math.floor(secAgo/60) + "m ago");
-    } else if(secAgo < 86400) { //hours
-        return (Math.floor(secAgo/3600) + "h, " + Math.floor((secAgo%3600)/60) + "m ago");
+    } else if (secAgo < 3600) { //minutes
+        return (Math.floor(secAgo / 60) + "m ago");
+    } else if (secAgo < 86400) { //hours
+        return (Math.floor(secAgo / 3600) + "h, " + Math.floor((secAgo % 3600) / 60) + "m ago");
     } else {
-        return (Math.floor(secAgo/86400) + "d ago");
+        return (Math.floor(secAgo / 86400) + "d ago");
     }
     return ("Last seen on " + now);
 }
