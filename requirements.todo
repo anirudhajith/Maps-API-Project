@@ -1,3 +1,4 @@
+Requirements:
 ✔ Write a small application that shows a Google map, in the browser @done(18-06-21 20:20)
 ✔ gets location of a few people from a http request from an API @done(18-06-21 20:20)
 ✔ display them on the map, @done(18-06-21 20:20)
@@ -5,7 +6,8 @@
 ✔ Create functionality to "center", @done(18-06-21 20:20)
 ✔ "follow" a marker @done(18-06-21 20:20)
 ✔ Customize marker to show user's image @done(18-06-21 20:50)
-☐ Customize marker to show "time ago"
+✔ Customize marker to show "time ago" @done(18-06-22 10:47)
 ☐ Make fetching location more efficient
 ☐ Change unfollow functionality to something that works even in fullscreen mode
-
+✔ Show accuracy circle @done(18-06-22 10:47)
+☐ Use Infoboxes instead of InfoWindow and Marker combination
