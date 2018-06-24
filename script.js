@@ -33,7 +33,7 @@ function initMap() {
 
 function performRequest() {
     var invocation = new XMLHttpRequest();
-    var url = 'https://iot.kpraveen.in/api/Users/5acb3b1a146ca8f84d18a8b2/data';
+    var url = '/data';
 
     if (invocation) {
         invocation.open('GET', url, true);
