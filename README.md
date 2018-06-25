@@ -1,6 +1,6 @@
 # Google Maps API Project
 
-This small web app scrapes data about the locations of certain individuals from https://iot.kpraveen.in/api/Users/5acb3b1a146ca8f84d18a8b2/data and displays these said individuals on the map using Google Maps API.
+This small web app displays the locations of people on a map using Google Maps API.
 
 ## Features:
 * Automatic live updates

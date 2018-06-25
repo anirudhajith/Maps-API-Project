@@ -35,7 +35,7 @@ function initMap() {
 
 function performRequest() {
     var invocation = new XMLHttpRequest();
-    var url = 'https://iot.kpraveen.in/api/Users/5acb3b1a146ca8f84d18a8b2/data?access_token=yIKhrdpk6tjemizEqBHeg0mR1FfGI3viqhFx9nmzbezBG2FYY4fwhOqHwZ8hAin7';
+    var url = '/data';
 
     if (invocation) {
         invocation.open('GET', url, true);
@@ -80,7 +80,7 @@ function updateMarkers(data) {
                 disableAutoPan: false,
                 
                 alignBottom: false,
-                pixelOffset: new google.maps.Size(-30,-90),
+                pixelOffset: new google.maps.Size(-27,-90),
                 zIndex: -1,
                 boxClass: "infobox",
 
