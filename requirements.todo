@@ -11,3 +11,6 @@ Requirements:
 ✔ Change unfollow functionality to something that works even in fullscreen mode @done(18-06-22 17:10)
 ✔ Show accuracy circle @done(18-06-22 10:47)
 ☐ Use Infoboxes instead of InfoWindow and Marker combination
+✔ Remove Zoom Controls from bottom @done(18-06-24 20:36)
+✔ Make map fullscreen @done(18-06-24 20:36)
+✔ Create mobile-friendly webpage @done(18-06-24 20:36)

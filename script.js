@@ -8,6 +8,8 @@ var infoWindows = {};
 var circles = {};
 var follow;
 
+google.maps.event.addDomListener(window, 'load', initMap);
+
 function initMap2() {
     map = new google.maps.Map(document.getElementById('map'), { zoom: zoomLevel, center: bangalore, disableDoubleClickZoom: true, mapTypeControl: true });
     document.getElementsByName("zoom")[0].value = map.getZoom();
@@ -25,7 +27,7 @@ function initMap2() {
 
 function initMap() {
     map = new google.maps.Map(document.getElementById('map'), { zoom: zoomLevel, center: bangalore, /*disableDoubleClickZoom: true,*/ mapTypeControl: true });
-    document.getElementsByName("zoom")[0].value = map.getZoom();
+    //document.getElementsByName("zoom")[0].value = map.getZoom();
 
     eventListeners();
     performRequest();
@@ -33,7 +35,7 @@ function initMap() {
 
 function performRequest() {
     var invocation = new XMLHttpRequest();
-    var url = 'https://iot.kpraveen.in/api/Users/5acb3b1a146ca8f84d18a8b2/data';
+    var url = 'https://iot.kpraveen.in/api/Users/5acb3b1a146ca8f84d18a8b2/data?access_token=yIKhrdpk6tjemizEqBHeg0mR1FfGI3viqhFx9nmzbezBG2FYY4fwhOqHwZ8hAin7';
 
     if (invocation) {
         invocation.open('GET', url, true);
@@ -64,13 +66,24 @@ function updateMarkers(data) {
                 position: pos,
                 map: map,
                 title: data.information[person].name,
-                icon: 'http://iot.kpraveen.in/images/' + data.information[person].name + '.png',
+                //icon: 'http://iot.kpraveen.in/images/' + data.information[person].name + '.png',
+                icon: {
+                    path: google.maps.SymbolPath.CIRCLE,
+                    scale: 0
+                }
                 /*label: {color: "yellow", text: data.information[person].name}*/
             });
 
-            infoWindows[data.information[person].name] = new google.maps.InfoWindow({
-                content: getTimeAgoString(data.information[person].lastLocationTime),
-                title: data.information[person].name
+            infoWindows[data.information[person].name] = new InfoBox({
+                content: "<img class='infobox-avatar' src='https://iot.kpraveen.in/images/" + data.information[person].name + ".png'><div class='infobox-text'>" + getTimeAgoString(data.information[person].lastLocationTime) + "</div><div class='infobox-pole'></div>",
+                title: data.information[person].name,
+                disableAutoPan: false,
+                
+                alignBottom: false,
+                pixelOffset: new google.maps.Size(-30,-90),
+                zIndex: -1,
+                boxClass: "infobox",
+
             });
 
             circles[data.information[person].name] = new google.maps.Circle({
@@ -90,13 +103,14 @@ function updateMarkers(data) {
                 map.panTo(this.getPosition());
                 console.log(this.getTitle() + " centred");
             });
+
             markers[data.information[person].name].addListener('dblclick', function () {
                 if (follow) {
                     follow = undefined;
                     console.log("Unfollowed");
                 } else {
                     follow = this;
-                    document.getElementsByName("unfollow")[0].style.display = "block";
+                    //document.getElementsByName("unfollow")[0].style.display = "block";
                     console.log("Following " + follow.getTitle());
                 }
             });
@@ -111,7 +125,7 @@ function updateMarkers(data) {
             };
 
             markers[data.information[person].name].setPosition(pos);
-            infoWindows[data.information[person].name].setContent(getTimeAgoString(data.information[person].lastLocationTime));
+            infoWindows[data.information[person].name].setContent("<img class='infobox-avatar' src='https://iot.kpraveen.in/images/" + data.information[person].name + ".png'><div class='infobox-text'>" + getTimeAgoString(data.information[person].lastLocationTime) + "</div><div class='infobox-pole'></div>");
             circles[data.information[person].name].setCenter(pos);
             circles[data.information[person].name].setRadius(data.information[person].accuracy);
 
@@ -140,10 +154,11 @@ function getTimeAgoString(lastSeen) {
 }
 
 function eventListeners() {
-    map.addListener('zoom_changed', function () {
+    /*map.addListener('zoom_changed', function () {
         console.log("Zoom Changed");
         document.getElementsByName("zoom")[0].value = map.getZoom();
     });
+    */
     /* map.addListener('dblclick', function (event) {
         console.log("Double Click");
         map.panTo(event.latLng);

@@ -1,0 +1,14 @@
+{
+    "short_name": "Maps API Project",
+    "name": "Google Maps API Project",
+    "icons": [
+      {
+        "src": "favicon.ico",
+        "sizes": "16x16",
+        "type": "Windows icon"
+      }
+    ],
+    "start_url": "/index.html",
+    "display": "standalone",
+    "orientation": "portrait"
+  }
