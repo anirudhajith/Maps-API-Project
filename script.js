@@ -75,23 +75,23 @@ function updateMarkers(data) {
             });
 
             infoWindows[data.information[person].name] = new InfoBox({
-                content: "<img class='infobox-avatar' src='https://iot.kpraveen.in/images/" + data.information[person].name + ".png'><div class='infobox-text'>" + getTimeAgoString(data.information[person].lastLocationTime) + "</div><div class='infobox-pole'></div>",
+                content: "<img class='infobox-marker' src='marker.png'><img class='infobox-avatar' src='https://iot.kpraveen.in/images/" + data.information[person].name + ".png'><div class='infobox-text'>" + getTimeAgoString(data.information[person].lastLocationTime) + "</div>",
                 title: data.information[person].name,
                 disableAutoPan: false,
                 
                 alignBottom: false,
-                pixelOffset: new google.maps.Size(-27,-90),
+                pixelOffset: new google.maps.Size(-45,-90),
                 zIndex: -1,
                 boxClass: "infobox",
 
             });
 
             circles[data.information[person].name] = new google.maps.Circle({
-                strokeColor: '#FF0000',
-                strokeOpacity: 0.8,
+                strokeColor: '#0000FF',
+                strokeOpacity: 0.2,
                 strokeWeight: 2,
-                fillColor: '#FF0000',
-                fillOpacity: 0.35,
+                fillColor: "#0000FF",
+                fillOpacity: 0.10,
                 map: map,
                 center: pos,
                 radius: data.information[person].accuracy
@@ -125,7 +125,7 @@ function updateMarkers(data) {
             };
 
             markers[data.information[person].name].setPosition(pos);
-            infoWindows[data.information[person].name].setContent("<img class='infobox-avatar' src='https://iot.kpraveen.in/images/" + data.information[person].name + ".png'><div class='infobox-text'>" + getTimeAgoString(data.information[person].lastLocationTime) + "</div><div class='infobox-pole'></div>");
+            infoWindows[data.information[person].name].setContent("<img class='infobox-marker' src='marker.png'><img class='infobox-avatar' src='https://iot.kpraveen.in/images/" + data.information[person].name + ".png'><div class='infobox-text'>" + getTimeAgoString(data.information[person].lastLocationTime) + "</div>");
             circles[data.information[person].name].setCenter(pos);
             circles[data.information[person].name].setRadius(data.information[person].accuracy);
 
@@ -146,7 +146,7 @@ function getTimeAgoString(lastSeen) {
     } else if (secAgo < 3600) { //minutes
         return (Math.floor(secAgo / 60) + "m ago");
     } else if (secAgo < 86400) { //hours
-        return (Math.floor(secAgo / 3600) + "h, " + Math.floor((secAgo % 3600) / 60) + "m ago");
+        return (Math.floor(secAgo / 3600) + "h " + Math.floor((secAgo % 3600) / 60) + "m ago");
     } else {
         return (Math.floor(secAgo / 86400) + "d ago");
     }
