@@ -15,7 +15,7 @@ function initMap2() {
     document.getElementsByName("zoom")[0].value = map.getZoom();
 
     marker = new google.maps.Marker({ position: pos, map: map });
-    eventListeners();
+
     if (document.cookie) {
         welcome();
     } else {
@@ -29,7 +29,6 @@ function initMap() {
     map = new google.maps.Map(document.getElementById('map'), { zoom: zoomLevel, center: bangalore, /*disableDoubleClickZoom: true,*/ mapTypeControl: true });
     //document.getElementsByName("zoom")[0].value = map.getZoom();
 
-    eventListeners();
     performRequest();
 }
 
@@ -49,6 +48,8 @@ function performRequest() {
     } else {
         console.log("Request failed");
     }
+
+    //if(follow) centerPerson(follow);
 }
 
 function updateMarkers(data) {
@@ -75,12 +76,12 @@ function updateMarkers(data) {
             });
 
             infoWindows[data.information[person].name] = new InfoBox({
-                content: "<img class='infobox-marker' src='marker.png'><img class='infobox-avatar' src='https://iot.kpraveen.in/images/" + data.information[person].name + ".png'><div class='infobox-text'>" + getTimeAgoString(data.information[person].lastLocationTime) + "</div>",
+                content: "<img class='infobox-marker' src='marker.png'><img class='infobox-avatar' src='https://iot.kpraveen.in/images/" + data.information[person].name + ".png' onclick='centerPerson(\"" + data.information[person].name + "\")' ondblclick='followPerson(\"" + data.information[person].name + "\")'><div class='infobox-text'>" + getTimeAgoString(data.information[person].lastLocationTime) + "</div>",
                 title: data.information[person].name,
                 disableAutoPan: false,
-                
+
                 alignBottom: false,
-                pixelOffset: new google.maps.Size(-45,-90),
+                pixelOffset: new google.maps.Size(-45, -90),
                 zIndex: -1,
                 boxClass: "infobox",
 
@@ -125,15 +126,31 @@ function updateMarkers(data) {
             };
 
             markers[data.information[person].name].setPosition(pos);
-            infoWindows[data.information[person].name].setContent("<img class='infobox-marker' src='marker.png'><img class='infobox-avatar' src='https://iot.kpraveen.in/images/" + data.information[person].name + ".png'><div class='infobox-text'>" + getTimeAgoString(data.information[person].lastLocationTime) + "</div>");
+            infoWindows[data.information[person].name].setContent("<img class='infobox-marker' src='marker.png'><img class='infobox-avatar' src='https://iot.kpraveen.in/images/" + data.information[person].name + ".png' onclick='centerPerson(\"" + data.information[person].name + "\")' ondblclick='followPerson(\"" + data.information[person].name + "\")'><div class='infobox-text'>" + getTimeAgoString(data.information[person].lastLocationTime) + "</div>");
             circles[data.information[person].name].setCenter(pos);
             circles[data.information[person].name].setRadius(data.information[person].accuracy);
 
-            if (follow) map.panTo(follow.getPosition());
+            if (follow) map.panTo(markers[follow].getPosition());
             //console.log(pos);
         }
     }
     console.log(markers);
+}
+
+function centerPerson(person) {
+    map.panTo(markers[person].getPosition());
+    console.log(person + " centred");
+}
+
+function followPerson(person) {
+    if (follow) {
+        follow = undefined;
+        console.log("Unfollowed");
+    } else {
+        follow = person;
+        //document.getElementsByName("unfollow")[0].style.display = "block";
+        console.log("Following " + follow);
+    }
 }
 
 function getTimeAgoString(lastSeen) {
@@ -151,18 +168,6 @@ function getTimeAgoString(lastSeen) {
         return (Math.floor(secAgo / 86400) + "d ago");
     }
     return ("Last seen on " + now);
-}
-
-function eventListeners() {
-    /*map.addListener('zoom_changed', function () {
-        console.log("Zoom Changed");
-        document.getElementsByName("zoom")[0].value = map.getZoom();
-    });
-    */
-    /* map.addListener('dblclick', function (event) {
-        console.log("Double Click");
-        map.panTo(event.latLng);
-    }); */
 }
 
 function welcome() {

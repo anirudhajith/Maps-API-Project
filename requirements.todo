@@ -2,7 +2,7 @@ Requirements:
 ✔ Write a small application that shows a Google map, in the browser @done(18-06-21 20:20)
 ✔ gets location of a few people from a http request from an API @done(18-06-21 20:20)
 ✔ display them on the map, @done(18-06-21 20:20)
-☐ using NodeJS and host it on http://anirudh.app/
+✔ using NodeJS and host it on http://anirudh.app/ @done(18-06-25 22:09)
 ✔ Create functionality to "center", @done(18-06-21 20:20)
 ✔ "follow" a marker @done(18-06-21 20:20)
 ✔ Customize marker to show user's image @done(18-06-21 20:50)
@@ -10,7 +10,8 @@ Requirements:
 ☐ Make fetching location more efficient
 ✔ Change unfollow functionality to something that works even in fullscreen mode @done(18-06-22 17:10)
 ✔ Show accuracy circle @done(18-06-22 10:47)
-☐ Use Infoboxes instead of InfoWindow and Marker combination
+✔ Use Infoboxes instead of InfoWindow and Marker combination @done(18-06-25 22:09)
 ✔ Remove Zoom Controls from bottom @done(18-06-24 20:36)
 ✔ Make map fullscreen @done(18-06-24 20:36)
 ✔ Create mobile-friendly webpage @done(18-06-24 20:36)
+☐ Resurrect click and dblclick event-listeners
