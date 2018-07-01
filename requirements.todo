@@ -15,3 +15,8 @@ Requirements:
 ✔ Make map fullscreen @done(18-06-24 20:36)
 ✔ Create mobile-friendly webpage @done(18-06-24 20:36)
 ✔ Resurrect click and dblclick event-listeners @done(18-06-26 14:36)
+☐ Directions from some user to me
+☐ Draw track of moving user
+☐ Update locations of peeps when page loads
+☐ Time slider
+☐ Hide map api key from client

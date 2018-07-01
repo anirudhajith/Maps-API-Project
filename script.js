@@ -1,159 +1,194 @@
-var bangalore = { lat: 12.9716, lng: 77.5946 };
-var pos;
-var zoomLevel = 9;
-var map;
-var name;
-var markers = {};
-var infoWindows = {};
-var circles = {};
-var follow;
 
-google.maps.event.addDomListener(window, 'load', initMap);
 
-function initMap2() {
-    map = new google.maps.Map(document.getElementById('map'), { zoom: zoomLevel, center: bangalore, disableDoubleClickZoom: true, mapTypeControl: true });
-    document.getElementsByName("zoom")[0].value = map.getZoom();
+google.maps.event.addDomListener(window, 'load', init);
 
-    marker = new google.maps.Marker({ position: pos, map: map });
+function init() {
+    var gMapElements = {
+        map: null,
+        markers: [],
+        infoboxes: [],
+        circles: [],
+        lastCentered: null,
+        following: null
+    };
 
-    if (document.cookie) {
-        welcome();
-    } else {
-        name = prompt("Enter your name: ");
-        document.cookie = "name=" + name;
-        welcome();
-    }
+    initMap(gMapElements);
+    initMapElements(gMapElements);
+    console.log("initialized");
+    //setInterval(updateMapElements(gMapElements), 5000);
 }
 
-function initMap() {
-    map = new google.maps.Map(document.getElementById('map'), { zoom: zoomLevel, center: bangalore, /*disableDoubleClickZoom: true,*/ mapTypeControl: true });
-    //document.getElementsByName("zoom")[0].value = map.getZoom();
 
-    performRequest();
+function initMap(mapElements) { // initializes map object
+    mapElements.map = new google.maps.Map(document.getElementById('map'), {
+        center: { // Bangalore
+            lat: 12.9716,
+            lng: 77.5946
+        },
+        zoom: 12,
+        mapTypeControl: true
+    });
 }
 
-function performRequest() {
-    var invocation = new XMLHttpRequest();
+function initMapElements(mapElements) { // initializes markers, infoboxes, circles
+
+    var reqObj = new XMLHttpRequest();
     var url = '/data';
+    var dataObj;
 
-    if (invocation) {
-        invocation.open('GET', url, true);
-        invocation.onreadystatechange = function () {
+    if (reqObj) {
+        reqObj.open('GET', url, true);
+        reqObj.onreadystatechange = function () {
             if (this.readyState == 4 && this.status == 200) {
-                updateMarkers(JSON.parse(this.responseText));
+                console.log("req successful");
+                dataObj = JSON.parse(this.responseText).information;
+                console.log(dataObj);
+                for (person in dataObj) {
+                    var pos = {
+                        lat: dataObj[person].latitude,
+                        lng: dataObj[person].longitude
+                    };
+
+                    mapElements.markers[person] = new google.maps.Marker({
+                        position: pos,
+                        map: mapElements.map,
+                        title: dataObj[person].name,
+                        icon: {
+                            path: google.maps.SymbolPath.CIRCLE,
+                            scale: 0
+                        }
+                    });
+
+                    mapElements.infoboxes[person] = new InfoBox({
+                        content: "<img class='infobox-marker' src='marker.png'><img class='infobox-avatar' src='https://iot.kpraveen.in/images/"
+                            + dataObj[person].name + ".png' onclick='centerPerson(\""
+                            + person + "\")' ondblclick='followPerson(\""
+                            + person + "\")' oncontextmenu='drawRouteTo(\""
+                            + person + "\")'><div class='infobox-text'>"
+                            + getTimeAgoString(dataObj[person].lastLocationTime) + "</div>",
+
+                        title: dataObj[person].name,
+                        disableAutoPan: false,
+                        alignBottom: false,
+                        pixelOffset: new google.maps.Size(-45, -90),
+                        zIndex: -1,
+                        boxClass: "infobox",
+                    });
+
+                    mapElements.circles[person] = new google.maps.Circle({
+                        strokeColor: '#0000FF',
+                        TostrokeOpacity: 0.2,
+                        TostrokeWeight: 2,
+                        TofillColor: "#0000FF",
+                        TofillOpacity: 0.10,
+                        Tomap: map,
+                        center: pos,
+                        radius: dataObj[person].accuracy
+                    });
+
+                    mapElements.infoboxes[person].open(mapElements.map, mapElements.markers[person]);
+                }
+            } else {
+                console.log("req failed");
             }
         };
-        invocation.send();
-        console.log("Request successful");
-    } else {
-        console.log("Request failed");
+        reqObj.send();
     }
-
-    //if(follow) centerPerson(follow);
+    console.log(mapElements);
 }
 
-function updateMarkers(data) {
-    //console.log(data);
-    if (Object.keys(markers).length === 0 && markers.constructor === Object) {
-        for (person in data.information) {
-            console.log(data.information[person]);
-            //var name = data.information[person].name;
-            pos = {
-                lat: data.information[person].latitude,
-                lng: data.information[person].longitude
-            };
 
-            markers[data.information[person].name] = new google.maps.Marker({
-                position: pos,
-                map: map,
-                title: data.information[person].name,
-                //icon: 'http://iot.kpraveen.in/images/' + data.information[person].name + '.png',
-                icon: {
-                    path: google.maps.SymbolPath.CIRCLE,
-                    scale: 0
+function updateMapElements(mapElements) { // updates markers, infoboxes, circles
+    var reqObj = new XMLHttpRequest();
+    var url = '/data';
+    var dataObj;
+
+    if (reqObj) {
+        reqObj.open('GET', url, true);
+        reqObj.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                dataObj = JSON.parse(this.responseText).information;
+                for (person in dataObj) {
+                    var pos = {
+                        lat: dataObj[person].latitude,
+                        lng: dataObj[person].longitude
+                    };
+                    mapElements.markers[person].setPosition(pos);
+                    mapElements.infoboxes[person].setContent("<img class='infobox-marker' src='marker.png'><img class='infobox-avatar' src='https://iot.kpraveen.in/images/"
+                        + dataObj[person].name + ".png' onclick='centerPerson(\""
+                        + person + "\")' ondblclick='followPerson(\""
+                        + person + "\")' oncontextmenu='drawRouteTo(\""
+                        + person + "\")'><div class='infobox-text'>"
+                        + getTimeAgoString(dataObj[person].lastLocationTime) + "</div>");
+                    mapElements.circles[person].setCenter(pos);
+                    mapElements.circles[person].setRadius(dataObj[person].accuracy);
                 }
-                /*label: {color: "yellow", text: data.information[person].name}*/
-            });
 
-            infoWindows[data.information[person].name] = new InfoBox({
-                content: "<img class='infobox-marker' src='marker.png'><img class='infobox-avatar' src='https://iot.kpraveen.in/images/" + data.information[person].name + ".png' onclick='centerPerson(\"" + data.information[person].name + "\")' ondblclick='followPerson(\"" + data.information[person].name + "\")'><div class='infobox-text'>" + getTimeAgoString(data.information[person].lastLocationTime) + "</div>",
-                title: data.information[person].name,
-                disableAutoPan: false,
-
-                alignBottom: false,
-                pixelOffset: new google.maps.Size(-45, -90),
-                zIndex: -1,
-                boxClass: "infobox",
-
-            });
-
-            circles[data.information[person].name] = new google.maps.Circle({
-                strokeColor: '#0000FF',
-                strokeOpacity: 0.2,
-                strokeWeight: 2,
-                fillColor: "#0000FF",
-                fillOpacity: 0.10,
-                map: map,
-                center: pos,
-                radius: data.information[person].accuracy
-            });
-
-            infoWindows[data.information[person].name].open(map, markers[data.information[person].name]);
-
-            markers[data.information[person].name].addListener('click', function () {
-                map.panTo(this.getPosition());
-                console.log(this.getTitle() + " centred");
-            });
-
-            markers[data.information[person].name].addListener('dblclick', function () {
-                if (follow) {
-                    follow = undefined;
-                    console.log("Unfollowed");
-                } else {
-                    follow = this;
-                    //document.getElementsByName("unfollow")[0].style.display = "block";
-                    console.log("Following " + follow.getTitle());
+                if (mapElements.following) {
+                    centerPerson(mapElements, mapElements.following);
                 }
-            });
-            //console.log(pos);
-        }
-    } else {
-        for (person in data.information) {
-            console.log(data.information[person]);
-            pos = {
-                lat: data.information[person].latitude,
-                lng: data.information[person].longitude
+            }
+        };
+        reqObj.send();
+        return dataObj;
+    }
+
+}
+
+function getData() { // retrieves and returns location data
+    console.log("getting data");
+    var reqObj = new XMLHttpRequest();
+    var url = '/data';
+    var dataObj;
+
+    if (reqObj) {
+        reqObj.open('GET', url, true);
+        reqObj.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                dataObj = JSON.parse(this.responseText).information;
+                console.log(dataObj);
+            }
+        };
+        reqObj.send();
+        return dataObj;
+    }
+}
+
+function drawRouteTo(mapElements, person) { // draws route from lastCentered to person 
+    if (mapElements.lastCentered) {
+        var origin = mapElements.lastCentered;
+        var source = mapElements.markers[origin].getPosition(),
+            dest = mapElements.markers[person].getPosition();
+
+        var sCoord = source.lat + "," + source.lng,
+            dCoord = dest.lat + "," + dest.lng;
+
+        var reqObj = new XMLHttpRequest();
+        var url = "/directions?source=" + sCoord + "&dest=" + dCoord;
+
+        if (reqObj) {
+            reqObj.open('GET', url, true);
+            reqObj.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    var routeObj = JSON.parse(this.responseText);
+                    var routes = routeObj.routes;
+                    var polyline = google.maps.geometry.encoding.decodePath(routes[0].overview_polyline.points);
+                    var dPath = new google.maps.Polyline({
+                        path: polyline,
+                        geodesic: true,
+                        strokeColor: "#FF0000",
+                        strokeOpacity: 1.0,
+                        strokeWeight: 2
+                    });
+                    dPath.setMap(map);
+                }
             };
-
-            markers[data.information[person].name].setPosition(pos);
-            infoWindows[data.information[person].name].setContent("<img class='infobox-marker' src='marker.png'><img class='infobox-avatar' src='https://iot.kpraveen.in/images/" + data.information[person].name + ".png' onclick='centerPerson(\"" + data.information[person].name + "\")' ondblclick='followPerson(\"" + data.information[person].name + "\")'><div class='infobox-text'>" + getTimeAgoString(data.information[person].lastLocationTime) + "</div>");
-            circles[data.information[person].name].setCenter(pos);
-            circles[data.information[person].name].setRadius(data.information[person].accuracy);
-
-            if (follow) map.panTo(markers[follow].getPosition());
-            //console.log(pos);
+            reqObj.send();
         }
     }
-    console.log(markers);
 }
 
-function centerPerson(person) {
-    map.panTo(markers[person].getPosition());
-    console.log(person + " centred");
-}
-
-function followPerson(person) {
-    if (follow) {
-        follow = undefined;
-        console.log("Unfollowed");
-    } else {
-        follow = person;
-        //document.getElementsByName("unfollow")[0].style.display = "block";
-        console.log("Following " + follow);
-    }
-}
-
-function getTimeAgoString(lastSeen) {
+function getTimeAgoString(lastSeen) { // constructs and returns Last Seen string
     var now = new Date();
     var ls = new Date(lastSeen);
     var secAgo = Math.round((now - ls) / 1000);
@@ -170,43 +205,18 @@ function getTimeAgoString(lastSeen) {
     return ("Last seen on " + now);
 }
 
-function welcome() {
-    alert("Welcome " + getCookie("name") + "!");
+function centerPerson(mapElements, person) { // centers person and updates lastCentered
+    var pos = mapElements.markers[person].getPosition();
+    mapElements.map.panTo(pos);
+    mapElements.lastCentered = person;
 }
 
-function getCookie(cname) {
-    var name = cname + "=";
-    var decodedCookie = decodeURIComponent(document.cookie);
-    var ca = decodedCookie.split(';');
-    for (var i = 0; i < ca.length; i++) {
-        var c = ca[i];
-        while (c.charAt(0) == ' ') {
-            c = c.substring(1);
-        }
-        if (c.indexOf(name) == 0) {
-            return c.substring(name.length, c.length);
-        }
+function followPerson(mapElements, person) { // toggles follow-mode
+    //TODO: improve mechanism 
+    if (!mapElements.following) {
+        mapElements.following = person;
+    } else {
+        mapElements.following = null;
     }
-    return "";
 }
 
-function updateZoomLevel(newZL) {
-    map.setZoom(parseInt(newZL));
-}
-
-setInterval(performRequest, 5000);
-
-
-/*
-if(navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(function(position) {
-        pos = {lat: position.coords.latitude, lng: position.coords.longitude};
-        map.panTo(pos);
-        map.setZoom(17);
-        marker.setPosition(pos);
-        //marker.setLabel("Your current position");
-        
-
-    });
-}
-*/
