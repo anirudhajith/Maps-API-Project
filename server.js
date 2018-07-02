@@ -48,8 +48,10 @@ http.createServer(function (req, res) {
             maxRedirects: 10
         }, function (err, response, body) {
             if (err) throw err;
-            res.writeHead(200);
+            res.writeHead(200, {'Content-Type': 'text/plain; charset=UTF-8'});
+            console.log(body);
             res.write(body);
+            res.end();
         });
 
     } else {

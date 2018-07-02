@@ -1,25 +1,23 @@
-
+var mapElements = {
+    map: null,
+    markers: [],
+    infoboxes: [],
+    circles: [],
+    lastCentered: null,
+    following: null
+};
 
 google.maps.event.addDomListener(window, 'load', init);
 
 function init() {
-    var gMapElements = {
-        map: null,
-        markers: [],
-        infoboxes: [],
-        circles: [],
-        lastCentered: null,
-        following: null
-    };
-
-    initMap(gMapElements);
-    initMapElements(gMapElements);
+    initMap();
+    initMapElements();
     console.log("initialized");
-    //setInterval(updateMapElements(gMapElements), 5000);
+    setInterval(updateMapElements, 5000);
 }
 
 
-function initMap(mapElements) { // initializes map object
+function initMap() { // initializes map object
     mapElements.map = new google.maps.Map(document.getElementById('map'), {
         center: { // Bangalore
             lat: 12.9716,
@@ -30,146 +28,138 @@ function initMap(mapElements) { // initializes map object
     });
 }
 
-function initMapElements(mapElements) { // initializes markers, infoboxes, circles
+function initMapElements() { // initializes markers, infoboxes, circles
 
     var reqObj = new XMLHttpRequest();
     var url = '/data';
-    var dataObj;
+    var dataProm = getData();
+    dataProm.then(function (dataObj) {
+        for (person in dataObj) {
+            var pos = {
+                lat: dataObj[person].latitude,
+                lng: dataObj[person].longitude
+            };
 
-    if (reqObj) {
-        reqObj.open('GET', url, true);
-        reqObj.onreadystatechange = function () {
-            if (this.readyState == 4 && this.status == 200) {
-                console.log("req successful");
-                dataObj = JSON.parse(this.responseText).information;
-                console.log(dataObj);
-                for (person in dataObj) {
-                    var pos = {
-                        lat: dataObj[person].latitude,
-                        lng: dataObj[person].longitude
-                    };
-
-                    mapElements.markers[person] = new google.maps.Marker({
-                        position: pos,
-                        map: mapElements.map,
-                        title: dataObj[person].name,
-                        icon: {
-                            path: google.maps.SymbolPath.CIRCLE,
-                            scale: 0
-                        }
-                    });
-
-                    mapElements.infoboxes[person] = new InfoBox({
-                        content: "<img class='infobox-marker' src='marker.png'><img class='infobox-avatar' src='https://iot.kpraveen.in/images/"
-                            + dataObj[person].name + ".png' onclick='centerPerson(\""
-                            + person + "\")' ondblclick='followPerson(\""
-                            + person + "\")' oncontextmenu='drawRouteTo(\""
-                            + person + "\")'><div class='infobox-text'>"
-                            + getTimeAgoString(dataObj[person].lastLocationTime) + "</div>",
-
-                        title: dataObj[person].name,
-                        disableAutoPan: false,
-                        alignBottom: false,
-                        pixelOffset: new google.maps.Size(-45, -90),
-                        zIndex: -1,
-                        boxClass: "infobox",
-                    });
-
-                    mapElements.circles[person] = new google.maps.Circle({
-                        strokeColor: '#0000FF',
-                        TostrokeOpacity: 0.2,
-                        TostrokeWeight: 2,
-                        TofillColor: "#0000FF",
-                        TofillOpacity: 0.10,
-                        Tomap: map,
-                        center: pos,
-                        radius: dataObj[person].accuracy
-                    });
-
-                    mapElements.infoboxes[person].open(mapElements.map, mapElements.markers[person]);
+            mapElements.markers[person] = new google.maps.Marker({
+                position: pos,
+                map: mapElements.map,
+                title: dataObj[person].name,
+                icon: {
+                    path: google.maps.SymbolPath.CIRCLE,
+                    scale: 0
                 }
-            } else {
-                console.log("req failed");
-            }
-        };
-        reqObj.send();
-    }
+            });
+
+            mapElements.infoboxes[person] = new InfoBox({
+                content: "<img class='infobox-marker' src='marker.png'><img class='infobox-avatar' src='https://iot.kpraveen.in/images/"
+                    + dataObj[person].name + ".png' onclick='centerPerson(\""
+                    + person + "\")' ondblclick='followPerson(\""
+                    + person + "\")' oncontextmenu='drawRouteTo(\""
+                    + person + "\")'><div class='infobox-text'>"
+                    + getTimeAgoString(dataObj[person].lastLocationTime) + "</div>",
+
+                title: dataObj[person].name,
+                disableAutoPan: false,
+                alignBottom: false,
+                pixelOffset: new google.maps.Size(-45, -90),
+                zIndex: -1,
+                boxClass: "infobox",
+            });
+
+            mapElements.circles[person] = new google.maps.Circle({
+                strokeColor: '#0000FF',
+                TostrokeOpacity: 0.2,
+                TostrokeWeight: 2,
+                TofillColor: "#0000FF",
+                TofillOpacity: 0.10,
+                Tomap: map,
+                center: pos,
+                radius: dataObj[person].accuracy
+            });
+            mapElements.infoboxes[person].open(mapElements.map, mapElements.markers[person]);
+        }
+    });
     console.log(mapElements);
+
 }
 
 
-function updateMapElements(mapElements) { // updates markers, infoboxes, circles
+function updateMapElements() { // updates markers, infoboxes, circles
     var reqObj = new XMLHttpRequest();
     var url = '/data';
-    var dataObj;
+    var dataProm = getData();
 
-    if (reqObj) {
-        reqObj.open('GET', url, true);
-        reqObj.onreadystatechange = function () {
-            if (this.readyState == 4 && this.status == 200) {
-                dataObj = JSON.parse(this.responseText).information;
-                for (person in dataObj) {
-                    var pos = {
-                        lat: dataObj[person].latitude,
-                        lng: dataObj[person].longitude
-                    };
-                    mapElements.markers[person].setPosition(pos);
-                    mapElements.infoboxes[person].setContent("<img class='infobox-marker' src='marker.png'><img class='infobox-avatar' src='https://iot.kpraveen.in/images/"
-                        + dataObj[person].name + ".png' onclick='centerPerson(\""
-                        + person + "\")' ondblclick='followPerson(\""
-                        + person + "\")' oncontextmenu='drawRouteTo(\""
-                        + person + "\")'><div class='infobox-text'>"
-                        + getTimeAgoString(dataObj[person].lastLocationTime) + "</div>");
-                    mapElements.circles[person].setCenter(pos);
-                    mapElements.circles[person].setRadius(dataObj[person].accuracy);
-                }
-
-                if (mapElements.following) {
-                    centerPerson(mapElements, mapElements.following);
-                }
-            }
-        };
-        reqObj.send();
-        return dataObj;
+    dataProm.then(function (dataObj) {
+        for (person in dataObj) {
+            var pos = {
+                lat: dataObj[person].latitude,
+                lng: dataObj[person].longitude
+            };
+            mapElements.markers[person].setPosition(pos);
+            mapElements.infoboxes[person].setContent(
+                "<img class='infobox-marker' src='marker.png'><img class='infobox-avatar' src='https://iot.kpraveen.in/images/"
+                + dataObj[person].name + ".png' onclick='centerPerson(\""
+                + person + "\")' ondblclick='followPerson(\""
+                + person + "\")' oncontextmenu='drawRouteTo(\""
+                + person + "\")'><div class='infobox-text'>"
+                + getTimeAgoString(dataObj[person].lastLocationTime) + "</div>");
+            mapElements.circles[person].setCenter(pos);
+            mapElements.circles[person].setRadius(dataObj[person].accuracy);
+        }
+    });
+    
+    if (mapElements.following) {
+        centerPerson(mapElements.following);
     }
 
 }
+
 
 function getData() { // retrieves and returns location data
     console.log("getting data");
-    var reqObj = new XMLHttpRequest();
-    var url = '/data';
-    var dataObj;
-
-    if (reqObj) {
-        reqObj.open('GET', url, true);
-        reqObj.onreadystatechange = function () {
-            if (this.readyState == 4 && this.status == 200) {
-                dataObj = JSON.parse(this.responseText).information;
-                console.log(dataObj);
-            }
-        };
-        reqObj.send();
-        return dataObj;
-    }
-}
-
-function drawRouteTo(mapElements, person) { // draws route from lastCentered to person 
-    if (mapElements.lastCentered) {
-        var origin = mapElements.lastCentered;
-        var source = mapElements.markers[origin].getPosition(),
-            dest = mapElements.markers[person].getPosition();
-
-        var sCoord = source.lat + "," + source.lng,
-            dCoord = dest.lat + "," + dest.lng;
+    return new Promise(function (resolve, reject) {
 
         var reqObj = new XMLHttpRequest();
-        var url = "/directions?source=" + sCoord + "&dest=" + dCoord;
+        var url = '/data';
+        var dataObj;
 
         if (reqObj) {
             reqObj.open('GET', url, true);
             reqObj.onreadystatechange = function () {
                 if (this.readyState == 4 && this.status == 200) {
+                    dataObj = JSON.parse(this.responseText).information;
+                    resolve(dataObj);
+                    reject("ERR");
+                    console.log(dataObj);
+                    //console.log("dataProm:", dataProm);
+                }
+            };
+            reqObj.send();
+
+        }
+    });
+
+}
+
+function drawRouteTo(person) { // draws route from lastCentered to person 
+    if (mapElements.lastCentered) {
+        console.log("Getting route from", mapElements.lastCentered, person);
+        var origin = mapElements.lastCentered;
+        var source = mapElements.markers[origin].getPosition(),
+            dest = mapElements.markers[person].getPosition();
+
+        var sCoord = source.lat() + "," + source.lng(),
+            dCoord = dest.lat() + "," + dest.lng();
+
+        var reqObj = new XMLHttpRequest();
+        var url = "/directions?source=" + sCoord + "&dest=" + dCoord;
+        console.log("url:", url);
+        if (reqObj) {
+            reqObj.open('GET', url, true);
+            reqObj.onreadystatechange = function () {
+                console.log("Entered onreadystatechange");
+                if (this.readyState == 4 && this.status == 200) {
+                    console.log("Entered if");
                     var routeObj = JSON.parse(this.responseText);
                     var routes = routeObj.routes;
                     var polyline = google.maps.geometry.encoding.decodePath(routes[0].overview_polyline.points);
@@ -181,6 +171,9 @@ function drawRouteTo(mapElements, person) { // draws route from lastCentered to 
                         strokeWeight: 2
                     });
                     dPath.setMap(map);
+                    console.log("path drawn");
+                } else {
+                    console.log(this.readyState, this.status);
                 }
             };
             reqObj.send();
@@ -205,14 +198,15 @@ function getTimeAgoString(lastSeen) { // constructs and returns Last Seen string
     return ("Last seen on " + now);
 }
 
-function centerPerson(mapElements, person) { // centers person and updates lastCentered
+function centerPerson(person) { // centers person and updates lastCentered
     var pos = mapElements.markers[person].getPosition();
     mapElements.map.panTo(pos);
     mapElements.lastCentered = person;
 }
 
-function followPerson(mapElements, person) { // toggles follow-mode
+function followPerson(person) { // toggles follow-mode
     //TODO: improve mechanism 
+    //console.log(person + " followed");
     if (!mapElements.following) {
         mapElements.following = person;
     } else {
